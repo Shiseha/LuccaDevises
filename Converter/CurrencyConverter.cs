@@ -63,12 +63,6 @@ namespace LuccaDevises.Converter
                 {
                     var lastNode = possibility.Nodes.Last();
 
-                    // found the shortest path
-                    if (lastNode.Key == toConvert.TargetCurrency)
-                    {
-                        return possibility;
-                    }
-
                     var matchingRates = exchangeRates
                         .Where(e => lastNode.Key == e.InitialCurrency || lastNode.Key == e.TargetCurrency)
                         .ToList();
@@ -77,6 +71,14 @@ namespace LuccaDevises.Converter
                     {
                         var firstMatch = matchingRates.First();
                         possibilities = AddPathsFromMatches(possibilities, possibility, matchingRates);
+
+                        var shortest = possibilities.FirstOrDefault(p => p.Nodes.Last().Key == toConvert.TargetCurrency);
+                        // found the shortest path
+                        if (shortest != null)
+                        {
+                            return shortest;
+                        }
+
                         exchangeRates.RemoveAll(e => matchingRates.Contains(e));
                     }
                     else
@@ -91,6 +93,16 @@ namespace LuccaDevises.Converter
             }
             // empty list but no solution found
             return null;
+        }
+
+        public double ConvertCurrency(ConversionPath path)
+        {
+            float amount = path.Nodes[0].Value;
+            foreach(var node in path.Nodes.Skip(1))
+            {
+                amount *= node.Value;
+            }
+            return amount;
         }
 
         public void Run(string filePath)
@@ -118,6 +130,8 @@ namespace LuccaDevises.Converter
                     Console.WriteLine("No solution found for this exchange rates list");
                     return;
                 }
+
+                Console.WriteLine(Math.Round(ConvertCurrency(shortestPath)));
             }
             catch (IndexOutOfRangeException)
             {
