@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using LuccaDevises.Models;
+using LuccaDevises.Exceptions;
 
 namespace LuccaDevises.Converter
 {
@@ -27,7 +28,7 @@ namespace LuccaDevises.Converter
 
         public static IEnumerable<ExchangeRate> ParseRates(IEnumerable<string> lines, int exchangeRatesCount)
         {
-            return lines.Skip(2).Take(exchangeRatesCount)
+            IEnumerable<ExchangeRate> exchangeRates = lines.Skip(2).Take(exchangeRatesCount)
                 .Select(l => {
                     var sections = l.Split(';');
 
@@ -41,6 +42,9 @@ namespace LuccaDevises.Converter
                         };
                     }
                 });
+            
+            if (exchangeRates.Count() != exchangeRatesCount) throw new IncorrectRateCountException();
+            return exchangeRates;
         }
 
     }

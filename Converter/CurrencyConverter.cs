@@ -3,6 +3,7 @@ using System.Linq;
 using System;
 using System.IO;
 using LuccaDevises.Models;
+using LuccaDevises.Exceptions;
 
 namespace LuccaDevises.Converter
 {
@@ -125,23 +126,23 @@ namespace LuccaDevises.Converter
                 var exchangeRates = ExchangeRatesTableParser.ParseRates(lines, exchangeRatesCount);
 
                 ConversionPath shortestPath = GetShortestPath(toConvert, exchangeRates.ToList());
-                if (shortestPath == null)
-                {
-                    Console.WriteLine("No solution found for this exchange rates list");
-                    return;
-                }
 
                 Console.WriteLine(Math.Round(ConvertCurrency(shortestPath)));
             }
             catch (IndexOutOfRangeException)
             {
-                Console.Error.WriteLine($"Incorrect file: doesn't respect the exchange rates format");
+                Console.Error.WriteLine("Incorrect file: doesn't respect the exchange rates format");
                 Environment.Exit(1);
             }
             catch (FormatException)
             {
-                Console.Error.WriteLine($"Incorrect file: number of lines not provided");
+                Console.Error.WriteLine("Incorrect file: number of lines not provided");
                 Environment.Exit(1);
+            }
+            catch(IncorrectRateCountException)
+            {
+                Console.Error.WriteLine("Incorrect file: expected number of exchange rates differs from content");
+                return;
             }
         }
     }
