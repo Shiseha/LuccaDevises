@@ -70,7 +70,6 @@ namespace LuccaDevises.Converter
 
                     if (matchingRates.Any())
                     {
-                        var firstMatch = matchingRates.First();
                         possibilities = AddPathsFromMatches(possibilities, possibility, matchingRates);
 
                         var shortest = possibilities.FirstOrDefault(p => p.Nodes.Last().Key == toConvert.TargetCurrency);
@@ -126,6 +125,12 @@ namespace LuccaDevises.Converter
                 var exchangeRates = ExchangeRatesTableParser.ParseRates(lines, exchangeRatesCount);
 
                 ConversionPath shortestPath = GetShortestPath(toConvert, exchangeRates.ToList());
+
+                if (shortestPath == null)
+                {
+                    Console.Error.WriteLine("Incorrect file: no solution");
+                    Environment.Exit(1);
+                }
 
                 Console.WriteLine(Math.Round(ConvertCurrency(shortestPath)));
             }
